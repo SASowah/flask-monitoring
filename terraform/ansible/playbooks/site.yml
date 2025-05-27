@@ -1,0 +1,10 @@
+- name: Provision Lightsail Server
+  hosts: lightsail
+  become: true
+
+  roles:
+    - docker
+    - flask_app
+    - prometheus
+    - grafana
+    - nginx
