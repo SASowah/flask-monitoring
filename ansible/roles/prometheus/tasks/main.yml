@@ -1,0 +1,10 @@
+---
+- name: Create Prometheus config directory
+  file:
+    path: /opt/flask_app/prometheus
+    state: directory
+
+- name: Copy Prometheus config file
+  copy:
+    src: prometheus.yml
+    dest: /opt/flask_app/prometheus/prometheus.yml

@@ -1,0 +1,52 @@
+---
+- name: Ensure app directory exists
+  file:
+    path: /opt/flask_app
+    state: directory
+    owner: ubuntu
+    group: ubuntu
+    mode: '0755'
+
+- name: Copy Flask app
+  copy:
+    src: app.py
+    dest: /opt/flask_app/app.py
+
+- name: Copy requirements file
+  copy:
+    src: requirements.txt
+    dest: /opt/flask_app/requirements.txt
+
+- name: Copy Dockerfile
+  copy:
+    src: Dockerfile
+    dest: /opt/flask_app/Dockerfile
+
+- name: Copy docker-compose.yml
+  copy:
+    src: docker-compose.yml
+    dest: /opt/flask_app/docker-compose.yml
+
+- name: Create Prometheus config directory
+  file:
+    path: /opt/flask_app/prometheus
+    state: directory
+    owner: ubuntu
+    group: ubuntu
+    mode: '0755'
+
+- name: Copy Prometheus config
+  copy:
+    src: prometheus.yml
+    dest: /opt/flask_app/prometheus.yml
+
+- name: Build and run all containers (Flask+Gunicorn, Prometheus, Grafana)
+  command: docker compose up -d --build
+  args:
+    chdir: /opt/flask_app
+  register: docker_compose_build
+
+- name: Confirm containers are up
+  debug:
+    msg: "Docker Compose (with Gunicorn) ran successfully!"
+  when: docker_compose_build.rc == 0
