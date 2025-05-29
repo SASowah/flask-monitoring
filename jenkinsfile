@@ -17,7 +17,14 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                    docker.build("${DOCKER_IMAGE}:${BUILD_NUMBER}")
+                    stage('Build Docker Image') {
+    steps {
+        script {
+            docker.build("samsow/flask-monitoring:1", "ansible/roles/flask_app/files")
+        }
+    }
+}
+
                 }
             }
         }
