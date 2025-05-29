@@ -42,7 +42,7 @@ ssh -o StrictHostKeyChecking=no ubuntu@18.205.222.76 << 'ENDSSH'
 docker pull ${DOCKER_IMAGE}:${BUILD_NUMBER}
 docker stop flask-monitor || true
 docker rm flask-monitor || true
-docker run -d --name flask-monitor -p 80:5000 ${DOCKER_IMAGE}:${BUILD_NUMBER}
+docker run -d --name flask-monitor -p 5000:5000 ${DOCKER_IMAGE}:${BUILD_NUMBER}
 ENDSSH
 """
                 }
