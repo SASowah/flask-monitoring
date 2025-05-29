@@ -6,6 +6,7 @@ pipeline {
         DOCKER_CREDENTIALS_ID = 'docker-hub-creds'
         REMOTE_HOST = "ubuntu@18.205.222.76"
         SSH_KEY = credentials('lightsail-ssh') // Make sure this is correctly configured
+        BUILD_NUMBER = "${env.BUILD_NUMBER}"
     }
 
     stages {
@@ -35,15 +36,15 @@ pipeline {
 
         stage('Deploy to Lightsail') {
             steps {
-                sshagent(credentials: ['lightsail-ssh']) {
-                    sh """
-                    ssh -o StrictHostKeyChecking=no ${REMOTE_HOST} << 'ENDSSH'
-                    docker pull ${DOCKER_IMAGE}:${BUILD_NUMBER}
-                    docker stop flask-monitor || true
-                    docker rm flask-monitor || true
-                    docker run -d --name flask-monitor -p 5000:5000 ${DOCKER_IMAGE}:${BUILD_NUMBER}
+                            sh """
+                            ssh -o StrictHostKeyChecking=no ${REMOTE_HOST} << 'ENDSSH'
+                            docker pull ${DOCKER_IMAGE}:${BUILD_NUMBER}
+                            docker stop flask-monitor || true
+                            docker rm flask-monitor || true
+                            docker run -d --name flask-monitor -p 5000:5000 ${DOCKER_IMAGE}:${BUILD_NUMBER}
         ENDSSH
-                """
+                            """
+                    """
                 }
             }
         }
