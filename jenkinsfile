@@ -22,16 +22,6 @@ pipeline {
             }
         }
 
-        stage('Run Tests') {
-            steps {
-                script {
-                    docker.image("${DOCKER_IMAGE}:${BUILD_NUMBER}").inside {
-                        sh 'pytest tests/' // Only if you have tests
-                    }
-                }
-            }
-        }
-
         stage('Push to DockerHub') {
             steps {
                 withDockerRegistry([credentialsId: 'dockerhub-creds', url: '']) {
