@@ -35,20 +35,19 @@ pipeline {
         }
 
         stage('Deploy to Lightsail') {
-            steps {
-                            sh """
-                            ssh -o StrictHostKeyChecking=no ${REMOTE_HOST} << 'ENDSSH'
-                            docker pull ${DOCKER_IMAGE}:${BUILD_NUMBER}
-                            docker stop flask-monitor || true
-                            docker rm flask-monitor || true
-                            docker run -d --name flask-monitor -p 5000:5000 ${DOCKER_IMAGE}:${BUILD_NUMBER}
-        ENDSSH
-                            """
-                    """
-                }
-            }
+    steps {
+        sshagent(['ubuntu']) {
+            sh '''#!/bin/bash
+ssh -o StrictHostKeyChecking=no ubuntu@18.205.222.76 << 'ENDSSH'
+docker pull samsow/flask-monitoring:14
+docker stop flask-monitor || true
+docker rm flask-monitor || true
+docker run -d --name flask-monitor -p 80:5000 samsow/flask-monitoring:14
+ENDSSH
+            '''
         }
     }
+}
 
     post {
         success {
