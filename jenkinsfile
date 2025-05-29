@@ -13,10 +13,10 @@ pipeline {
             }
         }
 
-      stage('Run Ansible Playbook') {
-    steps {
-        sshagent(['lightsail-ssh']) {
-            sh 'ansible-playbook -i inventory/hosts.ini ansible/site.yml
+        stage('Run Ansible Playbook') {
+            steps {
+                sshagent(['lightsail-ssh']) {
+                    sh 'ansible-playbook -i inventory/hosts.ini ansible/site.yml'
                 }
             }
         }
