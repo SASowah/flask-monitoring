@@ -4,7 +4,7 @@ pipeline {
     environment {
         DOCKER_IMAGE = "samsow/flask-monitoring"
         REMOTE_HOST = "ubuntu@18.205.222.76"
-        SSH_KEY = credentials('lightsail-ssh') // Jenkins credential ID for your SSH private key
+        SSH_KEY = credentials('lightsail-ssh') // Make sure this is correctly configured
     }
 
     stages {
@@ -17,14 +17,17 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                    stage('Build Docker Image') {
-    steps {
-        script {
-            docker.build("samsow/flask-monitoring:1", "ansible/roles/flask_app/files")
+                    docker.build("${DOCKER_IMAGE}:${BUILD_NUMBER}", "ansible/roles/flask_app/files")
+                }
+            }
         }
-    }
-}
 
+        stage('Run Tests') {
+            steps {
+                script {
+                    docker.image("${DOCKER_IMAGE}:${BUILD_NUMBER}").inside {
+                        sh 'pytest tests/' // Only if you have tests
+                    }
                 }
             }
         }
