@@ -3,6 +3,7 @@ pipeline {
 
     environment {
         DOCKER_IMAGE = "samsow/flask-monitoring"
+        DOCKER_CREDENTIALS_ID = 'docker-hub-creds'
         REMOTE_HOST = "ubuntu@18.205.222.76"
         SSH_KEY = credentials('lightsail-ssh') // Make sure this is correctly configured
     }
