@@ -42,7 +42,7 @@ pipeline {
                     docker stop flask-monitor || true
                     docker rm flask-monitor || true
                     docker run -d --name flask-monitor -p 5000:5000 ${DOCKER_IMAGE}:${BUILD_NUMBER}
-                    ENDSSH
+        ENDSSH
                 """
                 }
             }
