@@ -35,15 +35,15 @@ pipeline {
 
         stage('Deploy to Lightsail') {
             steps {
-                withCredentials([sshUserPrivateKey(credentialsId: 'lightsail-ssh', keyFileVariable: 'SSH_KEY_PATH')]) {
-                    sh '''
-                    ssh -i $SSH_KEY_PATH -o StrictHostKeyChecking=no $REMOTE_HOST << EOF
+                sshagent(credentials: ['lightsail-ssh']) {
+                    sh """
+                    ssh -o StrictHostKeyChecking=no ${REMOTE_HOST} << 'ENDSSH'
                     docker pull ${DOCKER_IMAGE}:${BUILD_NUMBER}
                     docker stop flask-monitor || true
                     docker rm flask-monitor || true
                     docker run -d --name flask-monitor -p 5000:5000 ${DOCKER_IMAGE}:${BUILD_NUMBER}
-                    EOF
-                    '''
+                    ENDSSH
+                """
                 }
             }
         }
