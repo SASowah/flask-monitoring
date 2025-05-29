@@ -1,0 +1,59 @@
+pipeline {
+    agent any
+
+    environment {
+        DOCKER_IMAGE = "samsow/flask-monitoring"
+        REMOTE_HOST = "ubuntu@18.205.222.76"
+        SSH_KEY = credentials('lightsail-ssh') // Jenkins credential ID for your SSH private key
+    }
+
+    stages {
+        stage('Checkout Code') {
+            steps {
+                git branch: 'dev', url: 'https://github.com/SASowah/flask-monitoring.git'
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    docker.build("${DOCKER_IMAGE}:${BUILD_NUMBER}")
+                }
+            }
+        }
+
+        stage('Push to DockerHub') {
+            steps {
+                withDockerRegistry([credentialsId: 'dockerhub-creds', url: '']) {
+                    script {
+                        docker.image("${DOCKER_IMAGE}:${BUILD_NUMBER}").push()
+                    }
+                }
+            }
+        }
+
+        stage('Deploy to Lightsail') {
+            steps {
+                script {
+                    sh '''
+                    ssh -i $SSH_KEY -o StrictHostKeyChecking=no $REMOTE_HOST << EOF
+                    docker pull ${DOCKER_IMAGE}:${BUILD_NUMBER}
+                    docker stop flask-monitor || true
+                    docker rm flask-monitor || true
+                    docker run -d --name flask-monitor -p 5000:5000 ${DOCKER_IMAGE}:${BUILD_NUMBER}
+                    EOF
+                    '''
+                }
+            }
+        }
+    }
+
+    post {
+        success {
+            echo "✅ Deployment successful!"
+        }
+        failure {
+            echo "❌ Deployment failed!"
+        }
+    }
+}
