@@ -2,11 +2,8 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_IMAGE = "samsow/flask-monitoring"
-        DOCKER_CREDENTIALS_ID = 'docker-hub-creds'
         REMOTE_HOST = "ubuntu@18.205.222.76"
-        SSH_KEY = credentials('lightsail-ssh') // Make sure this is correctly configured
-        BUILD_NUMBER = "${env.BUILD_NUMBER}"
+        SSH_KEY = credentials('lightsail-ssh') // SSH key must be added in Jenkins credentials
     }
 
     stages {
@@ -16,35 +13,12 @@ pipeline {
             }
         }
 
-        stage('Build Docker Image') {
-            steps {
-                script {
-                    docker.build("${DOCKER_IMAGE}:${BUILD_NUMBER}", "ansible/roles/flask_app/files")
-                }
-            }
-        }
-
-        stage('Push to DockerHub') {
-            steps {
-                script {
-                    docker.withRegistry('https://index.docker.io/v1/', DOCKER_CREDENTIALS_ID) {
-                        docker.image("${DOCKER_IMAGE}:${BUILD_NUMBER}").push()
-                    }
-                }
-            }
-        }
-
-        stage('Deploy to Lightsail') {
+        stage('Run Ansible Playbook') {
             steps {
                 sshagent(['lightsail-ssh']) {
-                    sh """#!/bin/bash
-ssh -o StrictHostKeyChecking=no ubuntu@18.205.222.76 << 'ENDSSH'
-docker pull ${DOCKER_IMAGE}:${BUILD_NUMBER}
-docker stop flask-monitor || true
-docker rm flask-monitor || true
-docker run -d --name flask-monitor -p 5000:5000 ${DOCKER_IMAGE}:${BUILD_NUMBER}
-ENDSSH
-"""
+                    sh """
+                    ansible-playbook -i inventory/hosts.ini site.yml
+                    """
                 }
             }
         }
@@ -52,10 +26,10 @@ ENDSSH
 
     post {
         success {
-            echo "✅ Deployment successful!"
+            echo "✅ Lightsail deployment via Ansible completed successfully."
         }
         failure {
-            echo "❌ Deployment failed!"
+            echo "❌ Deployment failed. Check Ansible logs."
         }
     }
 }
