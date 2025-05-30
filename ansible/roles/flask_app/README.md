@@ -1,38 +1,67 @@
-Role Name
-=========
+# Flask Monitoring Stack (CI/CD Automated)
 
-A brief description of the role goes here.
+This project is a **Docker-based Flask Monitoring Stack** deployed on **AWS Lightsail**, fully automated with **Ansible** and **Jenkins CI/CD**.
 
-Requirements
-------------
+---
 
-Any pre-requisites that may not be covered by Ansible itself or the role should be mentioned here. For instance, if the role uses the EC2 module, it may be a good idea to mention in this section that the boto package is required.
+## Project Overview
 
-Role Variables
---------------
+**Tech Stack**:
+- Flask (Python)
+- Gunicorn (WSGI server)
+- NGINX (Reverse Proxy)
+- Prometheus (Metrics collection)
+- Grafana (Visualization)
+- Docker & Docker Compose
+- Ansible (Configuration Management)
+- Jenkins (CI/CD)
+- AWS Lightsail (Hosting)
 
-A description of the settable variables for this role should go here, including any variables that are in defaults/main.yml, vars/main.yml, and any variables that can/should be set via parameters to the role. Any variables that are read from other roles and/or the global scope (ie. hostvars, group vars, etc.) should be mentioned here as well.
+---
 
-Dependencies
-------------
+## Directory Structure
 
-A list of other roles hosted on Galaxy should go here, plus any details in regards to parameters that may need to be set for other roles, or variables that are used from other roles.
+```
+flask-monitoring
+├── ansible/
+│   ├── inventory/
+│   │   └── hosts.ini
+│   ├── roles/
+│   │   ├── flask_app/
+│   │   └── grafana/
+│   │   ├── prometheus/
+│   │   └── grafana/
+│   │   └── nginx/
+│   └── site.yml
+└── terraform
+└── Jenkinsfile
+```
 
-Example Playbook
-----------------
+---
 
-Including an example of how to use your role (for instance, with variables passed in as parameters) is always nice for users too:
+## CI/CD Workflow
 
-    - hosts: servers
-      roles:
-         - { role: username.rolename, x: 42 }
+- Code pushed to GitHub (dev branch)
+- Jenkins pulls code, builds Docker image, pushes to DockerHub
+- Ansible playbook is triggered from Jenkins to configure and deploy containers on Lightsail
+- All services run under Docker Compose and restart automatically
 
-License
--------
+---
 
-BSD
+## Dashboards
 
-Author Information
-------------------
+- **Grafana** is connected to **Prometheus**
+- Dashboards include:
+  - CPU & Memory Usage
+  - Request Rate by Status Code
+  - Error Rate
+  - 95th Percentile Response Time
 
-An optional section for the role authors to include contact information, or a website (HTML is not allowed).
+---
+
+##  Deployment URL
+
+Prometheus: `http://<Lightsail-IP>:9090`  
+Grafana: `http://<Lightsail-IP>:3000`  
+Flask App: `http://<Lightsail-IP>` (served via NGINX)
+
